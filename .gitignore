@@ -1,0 +1,64 @@
+# node & package managers
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# build / cache / coverage
+dist/
+build/
+coverage/
+.vite/
+.next/
+.cache/
+
+# logs & debug
+npm-debug.log*
+yarn-debug.log*
+*.log
+
+# env / secrets
+.env*
+!.env.example             # keep a template if you want
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+####################################################################
+# Server-specific: ignore everything in /server except .gitkeep
+####################################################################
+server/*
+!server/.gitkeep
+
+####################################################################
+# Docker volumes
+####################################################################
+dbdata/ 
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
