@@ -27,11 +27,6 @@ yarn-debug.log*
 .DS_Store
 Thumbs.db
 
-####################################################################
-# Server-specific: ignore everything in /server except .gitkeep
-####################################################################
-server/*
-!server/.gitkeep
 
 ####################################################################
 # Docker volumes
