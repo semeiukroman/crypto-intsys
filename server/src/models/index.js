@@ -37,6 +37,18 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
+const { Cryptocurrency, Price, Event } = db;
+
+if (Cryptocurrency && Price) {
+  Cryptocurrency.hasMany(Price, { foreignKey: 'cryptoId' });
+  Price.belongsTo(Cryptocurrency, { foreignKey: 'cryptoId' });
+}
+
+if (Cryptocurrency && Event) {
+  Cryptocurrency.hasMany(Event, { foreignKey: 'cryptoId' });
+  Event.belongsTo(Cryptocurrency, { foreignKey: 'cryptoId' });
+}
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
