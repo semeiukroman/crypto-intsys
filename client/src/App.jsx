@@ -6,6 +6,13 @@ import EventsPage from './pages/EventsPage';
 import Analysis   from './pages/Analysis';
 import ApiDocs    from './pages/ApiDocs';
 import Auth      from './pages/Auth';
+import { Navigate } from 'react-router-dom';
+
+function PrivateRoute({ children }) {
+  return localStorage.getItem('token')
+    ? children
+    : <Navigate to="/auth" replace />;
+}
 
 const App = () => (
   <BrowserRouter>
@@ -15,7 +22,14 @@ const App = () => (
       <Route path="/history"  element={<History />} />
       <Route path="/events"   element={<EventsPage />} />
       <Route path="/analysis" element={<Analysis />} />
-      <Route path="/api-docs" element={<ApiDocs />} />
+      +  <Route
+    path="/api-docs"
+    element={
+      <PrivateRoute>
+        <ApiDocs />
+      </PrivateRoute>
+    }
+  />
       <Route path="/auth"    element={<Auth />} />
     </Routes>
   </BrowserRouter>

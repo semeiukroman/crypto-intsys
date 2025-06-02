@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const requireAuth   = require('./middleware/requireAuth'); 
 const { Sequelize } = require('sequelize');
 
 const priceRoutes = require('./routes/priceRoutes');
@@ -28,11 +29,12 @@ async function start() {
   const app = express();
   app.use(cors());
   app.use(express.json());
-  app.use('/api/prices',  priceRoutes);
-  app.use('/api/events',  eventRoutes);
-  app.use('/api/auth', authRoutes);
-  app.use('/api/cryptos', cryptoRoutes);
+  app.use('/api/auth',     authRoutes);
+  app.use('/api/prices',   priceRoutes);
+  app.use('/api/events',   eventRoutes);
+  app.use('/api/cryptos',  cryptoRoutes);
   app.use('/api/analysis', analysisRoutes);
+  
 
   app.get('/health', (_, res) => res.json({ status: 'ok' }));
 

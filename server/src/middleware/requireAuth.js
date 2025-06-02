@@ -6,8 +6,12 @@ function requireAuth(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth) return res.status(401).json({ error: 'No token' });
 
+  const [scheme, token] = auth.split(' ');
+  if (scheme !== 'Bearer' || !token)
+    return res.status(401).json({ error: 'Malformed token' });
+
   try {
-    req.user = jwt.verify(auth.split(' ')[1], JWT_SECRET);
+    req.user = jwt.verify(token, JWT_SECRET);
     next();
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });
