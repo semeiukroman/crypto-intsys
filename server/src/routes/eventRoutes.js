@@ -2,8 +2,11 @@ const express = require('express');
 const { Op } = require('sequelize');
 const { Event, Cryptocurrency } = require('../models');
 const { fetchEvents } = require('../services/eventFetcher');
+const requireAuth = require('../middleware/requireAuth');
 
 const router = express.Router();
+
+router.use(requireAuth);
 
 /* on-demand refresh */
 router.post('/refresh', async (_, res, next) => {
