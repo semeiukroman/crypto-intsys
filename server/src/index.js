@@ -5,6 +5,8 @@ const { Sequelize } = require('sequelize');
 
 const priceRoutes = require('./routes/priceRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const cryptoRoutes = require('./routes/cryptoRoutes');
+const analysisRoutes = require('./routes/analysisRoutes');
 const { startSchedulers } = require('./jobs/scheduler');
 
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS, {
@@ -27,6 +29,8 @@ async function start() {
   app.use(express.json());
   app.use('/api/prices',  priceRoutes);
   app.use('/api/events',  eventRoutes);
+  app.use('/api/cryptos', cryptoRoutes);
+  app.use('/api/analysis', analysisRoutes);
 
 
   app.get('/health', (_, res) => res.json({ status: 'ok' }));
