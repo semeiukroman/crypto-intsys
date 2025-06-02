@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios'
 
 export default function Auth() {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -9,18 +10,41 @@ export default function Auth() {
     password: '',
     confirm: '',
   });
+    
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
 
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isLogin && form.password !== form.confirm) {
       alert("Passwords don't match");
       return;
     }
-    // TODO: axios.post(isLogin ? '/auth/login' : '/auth/register', ...)
-    alert(`${isLogin ? 'Login' : 'Register'}: ${form.username}`);
+
+    const { username, password } = form;
+    const response = await axios.post(isLogin ? '/api/auth/login' : '/api/auth/register', { username, password });
+    localStorage.setItem('token', response.data.token);
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.token;
+    //alert(`${isLogin ? 'Login' : 'Register'}: ${form.username}`);
+    window.location = "/"
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+  };
+
+  if (isLoggedIn) {
+    return (
+    <main className="flex justify-center pt-10 px-4">
+      <div className="w-full max-w-md bg-white shadow-xl rounded-xl p-8">
+            <p>You are logged in</p>
+            <button onClick={handleLogout}>Sign out</button>
+        </div>
+    </main>
+    );
+  }
 
   return (
     <main className="flex justify-center pt-10 px-4">
