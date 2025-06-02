@@ -33,8 +33,20 @@ router.get('/', async (req, res, next) => {
         ...(to   && { [Op.lte]: to })
       };
 
-    const events = await Event.findAll({ where, order: [['date', 'ASC']] });
-    res.json(events);
+      const events = await Event.findAll({
+              where,
+              include: [{
+                model: Cryptocurrency,
+                attributes: ['symbol'],
+              }],
+              order: [['date', 'ASC']],
+            });
+        
+            /* Flatten so each record has { …, crypto: 'BTC' } */
+            res.json(events.map(e => ({
+              ...e.toJSON(),
+              crypto: e.Cryptocurrency.symbol,
+            })));
   } catch (err) { next(err); }
 });
 
