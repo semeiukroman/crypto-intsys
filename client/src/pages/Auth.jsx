@@ -2,11 +2,10 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export default function Auth() {
-  const [mode, setMode] = useState('login');      // 'login' | 'register'
+  const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ username: '', password: '', confirm: '' });
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem('token'));
 
-  /* pick up token on mount (for F5 reload while logged-in) */
   useEffect(() => {
     const tok = localStorage.getItem('token');
     if (tok) axios.defaults.headers.common['Authorization'] = 'Bearer ' + tok;
@@ -39,7 +38,6 @@ export default function Auth() {
     setLoggedIn(false);
   };
 
-  /* ── LOGGED-IN view ───────────────────────────────────────── */
   if (loggedIn) {
     return (
       <main className="flex justify-center pt-10 px-4">
@@ -56,7 +54,6 @@ export default function Auth() {
     );
   }
 
-  /* ── LOGIN / REGISTER form ───────────────────────────────── */
   const isLogin = mode === 'login';
   return (
     <main className="flex justify-center pt-10 px-4">

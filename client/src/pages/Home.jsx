@@ -11,19 +11,16 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [exportType, setExportType] = useState('json');
 
-  /* ───────────────────────── Fetch on mount ─────────────────────────── */
   useEffect(() => {
     refreshPrices();
   }, []);
 
-  /* ───────────────────────── Update prices ──────────────────────────── */
   async function refreshPrices() {
     try {
       setLoading(true);
-      // trigger backend fetch
-      await axios.post('/api/prices/refresh');
+      
+      await axios.post(`/api/prices/refresh`);
 
-      // pull latest row for each symbol
       const results = await Promise.all(
         SYMBOLS.map(async (sym) => {
           const res   = await axios.get(`/api/prices/${sym}`);
@@ -40,7 +37,6 @@ export default function Home() {
     }
   }
 
-  /* ───────────────────────── Export table ───────────────────────────── */
   function exportTable() {
     const ts = dayjs().format('YYYYMMDD-HHmm');
     if (exportType === 'json') {
@@ -56,7 +52,6 @@ export default function Home() {
     }
   }
 
-  /* ───────────────────────── UI ─────────────────────────────────────── */
   return (
     <main className="max-w-6xl mx-auto px-4 py-6 space-y-4">
       <h1 className="text-3xl font-bold border-b-4 border-amber-400 inline-block">Live Prices</h1>

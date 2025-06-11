@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import axios from '../config/axios';
 import dayjs from 'dayjs';
 import {
   LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer
@@ -12,16 +12,25 @@ export default function History() {
   const [from,    setFrom]    = useState(dayjs().subtract(30, 'day').format('YYYY-MM-DD'));
   const [to,      setTo]      = useState(dayjs().format('YYYY-MM-DD'));
 
-  /* ─────────────── Load symbol list on mount ───────────────────────── */
+  const [yMin, yMax] = useMemo(() => {
+        if (!series.length) return [0, 1];
+        const prices = series.map(p => p.price);
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        // if flat line, give it a tiny buffer so it’s still visible
+        if (min === max) return [min * 0.95, max * 1.05];
+        return [min, max];
+      }, [series]);
+
   useEffect(() => {
     async function load() {
       try {
-        const res = await axios.get('/api/cryptos');   // you can expose this endpoint
+        const res = await axios.get('/api/cryptos');
         const list = res.data.map(c => c.symbol);
         setSymbols(list);
         setSymbol(list[0] || '');
       } catch (err) {
-        console.error('Fallback to hard-coded symbols'); // if /api/cryptos not ready
+        console.error('Fallback to hard-coded symbols');
         const fallback = ['BTC','ETH','DOGE','BNB','SOL','ADA','XRP','AVAX','LINK','MATIC'];
         setSymbols(fallback);
         setSymbol(fallback[0]);
@@ -30,7 +39,6 @@ export default function History() {
     load();
   }, []);
 
-  /* ─────────────── Fetch price series whenever inputs change ───────── */
   useEffect(() => {
     if (!symbol) return;
     async function fetchSeries() {
@@ -50,7 +58,6 @@ export default function History() {
     fetchSeries();
   }, [symbol, from, to]);
 
-  /* ───────────────────────── UI ─────────────────────────────────────── */
   return (
     <main className="max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-3xl font-bold border-b-4 border-amber-400 inline-block mb-6">
@@ -88,7 +95,7 @@ export default function History() {
           <LineChart data={series}>
             <CartesianGrid stroke="#ccc" />
             <XAxis dataKey="date" />
-            <YAxis width={80} />
+            <YAxis width={80} domain={[yMin, yMax]} />
             <Tooltip />
             <Line type="monotone" dataKey="price" stroke="#4f46e5" dot={false} />
           </LineChart>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../config/axios';
 import dayjs from 'dayjs';
 import classNames from 'classnames';
 import {
@@ -15,7 +15,6 @@ import {
   Bar,
 } from 'recharts';
 
-/* preset intervals */
 const INTERVALS = [
   { label: '12 h', value: 12 },
   { label: '1 d',  value: 24 },
@@ -23,18 +22,15 @@ const INTERVALS = [
   { label: '7 d',  value: 168 },
 ];
 
-/* helpers */
 const avg = (arr, k = 'price') => arr.reduce((s, d) => s + d[k], 0) / (arr.length || 1);
 const pct = (b, a) => (b === 0 ? 0 : ((a - b) / b) * 100);
 const clean = (x) => (!Number.isFinite(x) || Number.isNaN(x) ? 0 : x);   // ⬅️  new
 
 export default function Analysis() {
-  /* ─── state ───────────────────────────────────────────────────────── */
   const [cryptos, setCryptos]     = useState([]);
   const [events,  setEvents]      = useState([]);
   const [cats,    setCats]        = useState([]);
 
-  /* selections */
   const [sym,   setSym]   = useState('');
   const [eid,   setEid]   = useState(null);
   const [hrs,   setHrs]   = useState(24);
@@ -42,11 +38,9 @@ export default function Analysis() {
   const [cat,   setCat]   = useState('');
   const [cHrs,  setCHrs]  = useState(24);
 
-  /* data */
   const [chart, setChart] = useState({ series: [], avgBefore: 0, avgAfter: 0, delta: 0 });
   const [catRes, setCatRes] = useState({ avgDelta: 0, events: [] });
 
-  /* ─── initial load ────────────────────────────────────────────────── */
   useEffect(() => {
     (async () => {
       const [cRes, eRes] = await Promise.all([
@@ -69,7 +63,6 @@ export default function Analysis() {
     })();
   }, []);
 
-  /* ─── fetch event-impact data ─────────────────────────────────────── */
   useEffect(() => {
     if (!eid) return;
     (async () => {
@@ -81,7 +74,6 @@ export default function Analysis() {
     })();
   }, [eid, hrs]);
 
-  /* ─── fetch category data ─────────────────────────────────────────── */
   useEffect(() => {
     if (!cat) return;
     (async () => {
@@ -95,7 +87,6 @@ export default function Analysis() {
     })();
   }, [cat, cHrs]);
 
-  /* ─── UI helpers ──────────────────────────────────────────────────── */
   const Select = ({ label, value, onChange, options }) => (
     <label className="flex flex-col text-sm">
       {label}
@@ -117,23 +108,29 @@ export default function Analysis() {
     </label>
   );
 
-  const Stat = ({ label, value }) => (
-    <div>
-      <span className="text-sm text-slate-500">{label}</span>
-      <div
-        className={classNames(
-          'text-lg font-semibold',
-          value >= 0 ? 'text-emerald-600' : 'text-red-600',
-        )}
-      >
-        {value.toFixed(2)}
-      </div>
-    </div>
-  );
+  const Stat = ({ label, value }) => {
+      const noData = value === null || Math.abs(value) === 100;
+      return (
+        <div>
+          <span className="text-sm text-slate-500">{label}</span>
+          {noData ? (
+            <div className="text-slate-400">No data</div>
+          ) : (
+            <div
+              className={classNames(
+                'text-lg font-semibold',
+                value >= 0 ? 'text-emerald-600' : 'text-red-600',
+              )}
+            >
+              {value.toFixed(2)}
+            </div>
+          )}
+        </div>
+      );
+    };
 
   const selectedEvent = events.find((e) => e.id === eid);
 
-  /* ─── render ──────────────────────────────────────────────────────── */
   return (
     <main className="max-w-6xl mx-auto px-4 py-6 space-y-12">
       {/* 🟦 Event impact */}

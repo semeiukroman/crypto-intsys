@@ -5,7 +5,6 @@ const { Event, Price, Cryptocurrency } = require('../models');
 
 const router = express.Router();
 
-/* helper ─ average price for a time window */
 async function avgPrice(cryptoId, from, to) {
   const row = await Price.findOne({
     attributes: [[fn('AVG', col('price_usd')), 'avg']],
@@ -29,7 +28,6 @@ router.get('/event/:id', async (req, res, next) => {
     const start    = dayjs(ev.date).subtract(interval, 'hour').toDate();
     const end      = dayjs(ev.date).add(interval, 'hour').toDate();
 
-    /* price series for chart */
     const rows = await Price.findAll({
       where: { cryptoId, date: { [Op.between]: [start, end] } },
       order: [['date', 'ASC']],
@@ -37,10 +35,13 @@ router.get('/event/:id', async (req, res, next) => {
     });
     const series = rows.map(r => ({ time: r.date, price: r.price_usd }));
 
-    /* stats */
     const avgBefore = await avgPrice(cryptoId, start, ev.date);
     const avgAfter  = await avgPrice(cryptoId, ev.date, end);
-    const delta     = avgBefore === 0 ? 0 : ((avgAfter - avgBefore) / avgBefore) * 100;
+    // const delta     = avgBefore === 0 ? 0 : ((avgAfter - avgBefore) / avgBefore) * 100;
+    let delta = null;
+    if (avgBefore > 0 && avgAfter > 0) {
+      delta = ((avgAfter - avgBefore) / avgBefore) * 100;
+    }
 
     res.json({ series, avgBefore, avgAfter, delta });
   } catch (err) { next(err); }
@@ -66,7 +67,11 @@ router.get('/category', async (req, res, next) => {
 
       const avgB = await avgPrice(ev.cryptoId, start, ev.date);
       const avgA = await avgPrice(ev.cryptoId, ev.date, end);
-      const delta  = avgB === 0 ? 0 : ((avgA - avgB) / avgB) * 100;
+      // const delta  = avgB === 0 ? 0 : ((avgA - avgB) / avgB) * 100;
+      let delta = null;
+      if (avgB > 0 && avgA > 0) {
+        delta = ((avgA - avgB) / avgB) * 100;
+      }
 
       out.push({
         id: ev.id,
@@ -77,8 +82,15 @@ router.get('/category', async (req, res, next) => {
       });
     }
 
-    const avgDelta = out.reduce((s, d) => s + d.delta, 0) / out.length;
-    res.json({ avgDelta, events: out });
+    // const avgDelta = out.reduce((s, d) => s + d.delta, 0) / out.length;
+    // res.json({ avgDelta, events: out });
+
+    const valid = out.filter(o => o.delta !== null);
+    const avgDelta = valid.length
+      ? valid.reduce((s, d) => s + d.delta, 0) / valid.length
+      : null;
+
+      res.json({ avgDelta, events: out });
   } catch (err) { next(err); }
 });
 

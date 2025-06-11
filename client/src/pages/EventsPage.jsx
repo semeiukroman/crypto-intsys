@@ -1,30 +1,24 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import axios from '../config/axios';
 import dayjs from 'dayjs';
 
 export default function EventsPage() {
-  /* data -------------------------------------------------------------- */
   const [events, setEvents] = useState([]);
   const [categories, setCategories] = useState([]);
   const [cryptos, setCryptos] = useState([]);
 
-  /* filters ----------------------------------------------------------- */
   const [category, setCategory] = useState('All');
   const [crypto,   setCrypto]   = useState('All');
   const [asc,      setAsc]      = useState(true);
 
-  /* load from backend once ------------------------------------------- */
   useEffect(() => {
     async function load() {
-      /* fetch every event just once */
       const evRes = await axios.get('/api/events');
       setEvents(evRes.data);
 
-      /* get distinct categories */
       const cats = [...new Set(evRes.data.map(e => e.category))];
       setCategories(['All', ...cats]);
 
-      /* fetch crypto list for filter dropdown */
       try {
         const cRes = await axios.get('/api/cryptos');
         const syms = cRes.data.map(c => c.symbol);
@@ -37,7 +31,6 @@ export default function EventsPage() {
     load();
   }, []);
 
-  /* filtered + sorted list ------------------------------------------- */
   const filtered = useMemo(() => {
     return events
       .filter(e => (category === 'All' ? true : e.category === category))
@@ -49,7 +42,6 @@ export default function EventsPage() {
       );
   }, [events, category, crypto, asc]);
 
-  /* ui ---------------------------------------------------------------- */
   return (
     <main className="max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-3xl font-bold inline-block border-b-4 border-amber-400 mb-6">
